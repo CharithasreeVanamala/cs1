@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,9 +14,6 @@ spec:
     spec:
       containers:
       - name: app
-        image: charithasree37/cs1:last
-
+        image: charithasree37/cs1:latest
         ports:
-
         - containerPort: 5000
-
