@@ -1,40 +1,54 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage ("Build Docker Image"){
-            steps{
-                echo "Build Docker Image"
-                bat "docker build -t app:v2 ."
-            }
-        }
-        stage ("Docker Login"){
-            steps{
-                bat "docker login -u charithasree37 -p Krishna@09"
-            }
-        }
-        stage("push Docker Iamge to Docker Hub"){
+
+    environment {
+        IMAGE_NAME = "app"
+        IMAGE_TAG = "v2"
+        DOCKER_REPO = "charithasree37/cs1"
+    }
+
+    stages {
+        stage("Docker Login") {
             steps {
-                echo "push Docker Image to docker hub"
-                bat "docker tag app:v2 charithasree37/cs1:last"
-                bat "docker push charithasree37/cs1:last"
-
-
+                echo "Logging into Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                }
             }
         }
-        stage("Deploy to Kubernetes"){
-            steps{
-                bat "kubectl apply -f deployment.yaml --validate=false"
-                bat "kubectl apply -f service.yaml"
+
+        stage("Build Docker Image") {
+            steps {
+                echo "Building Docker Image..."
+                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+            }
+        }
+
+        stage("Push Docker Image to Docker Hub") {
+            steps {
+                echo "Tagging and pushing image..."
+                bat '''
+                    docker tag %IMAGE_NAME%:%IMAGE_TAG% %DOCKER_REPO%:latest
+                    docker push %DOCKER_REPO%:latest
+                '''
+            }
+        }
+
+        stage("Deploy to Kubernetes") {
+            steps {
+                echo "Deploying to Kubernetes..."
+                bat 'kubectl apply -f deployment.yaml --validate=false'
+                bat 'kubectl apply -f service.yaml'
             }
         }
     }
-    post{
-        success{
-            echo 'Pipeline completed scucessfull!'
 
+    post {
+        success {
+            echo '✅ Pipeline completed successfully!'
         }
-        failure{
-            echo "Pipeline failed.Please check the logs."
+        failure {
+            echo '❌ Pipeline failed. Please check logs.'
         }
     }
 }
