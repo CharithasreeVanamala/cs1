@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 app = Flask(__name__)
 
 # Predefined student list
-students = ["sita", "ram", "geetha", "ravi", "latha"]
+students = ["sita", "ramu", "geetha", "ravi", "latha"]
 
 @app.route('/')
 def home():
@@ -25,5 +25,6 @@ def attendance():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
+
 
 
