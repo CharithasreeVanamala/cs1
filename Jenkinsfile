@@ -41,6 +41,12 @@ pipeline {
                 bat 'kubectl apply -f service.yaml'
             }
         }
+        stage('Restart Deployment'){
+              steps{
+                  echo "Restarting Deployment to pick up new image.."
+                  bat "Kubectl rollout restart deployment/app-deployment"
+              }
+        }
     }
 
     post {
@@ -52,3 +58,4 @@ pipeline {
         }
     }
 }
+
